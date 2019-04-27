@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.gearback.custom.BoundedLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    app:bounded_width="120dp">
+    <com.gearback.custom.SquareLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/circle_green_border"/>
+            <com.gearback.custom.CircleImage
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/avatarImage"
+                android:layout_margin="3dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/image_0"/>
+            <com.gearback.custom.CircleImage
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="3dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/m0"/>
+        </RelativeLayout>
+    </com.gearback.custom.SquareLayout>
+    <com.gearback.custom.CustomFontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/normal_text"
+        android:textColor="@color/darkText"
+        android:id="@+id/avatarName"/>
+</com.gearback.custom.BoundedLinearLayout>
