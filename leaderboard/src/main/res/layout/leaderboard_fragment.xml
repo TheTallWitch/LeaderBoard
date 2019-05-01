@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -231,4 +232,11 @@
             android:text="@string/no_leader_board"
             android:id="@+id/noLeaderBoards"/>
     </RelativeLayout>
+    <com.webmarketer.publisher.Advertise
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:type="leaderboard"
+        app:borderWidth="1dp"
+        app:borderColor="@color/darkText"
+        android:id="@+id/adHolder"/>
 </LinearLayout>

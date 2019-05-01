@@ -27,9 +27,12 @@ import android.widget.TextView;
 
 import com.gearback.methods.Methods;
 import com.gearback.zt.leaderboard.R;
+import com.webmarketer.publisher.Advertise;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class LeaderBoardFragment extends Fragment {
@@ -38,11 +41,13 @@ public class LeaderBoardFragment extends Fragment {
     RecyclerView leaderBoardList;
     LeaderBoardAdapter adapter;
     TextView noLeaderBoard, backBtn, leaderBoardTitle;
+    Advertise adHolder;
     Methods methods = new Methods();
     GameMethods gameMethods = new GameMethods();
     List<Classes.LeaderBoard> leaderBoards = new ArrayList<>();
-    
-    String userToken = "", appToken = "";
+
+    boolean showAd = true;
+    String userToken = "", appToken = "", adToken = "";
     GameMethods.BackListener backListener = null;
     GameMethods.LoginListener loginListener = null;
 
@@ -59,6 +64,25 @@ public class LeaderBoardFragment extends Fragment {
         }
     };
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String ads = intent.getStringExtra("ads");
+            if (ads.equals("1")) {
+                if (!showAd) {
+                    if (isAdded()) {
+                        InitializeAd(adHolder);
+                    }
+                }
+                showAd = true;
+            }
+            else {
+                showAd = false;
+                adHolder.setVisibility(View.GONE);
+            }
+        }
+    };
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.leaderboard_fragment, container, false);
@@ -67,6 +91,7 @@ public class LeaderBoardFragment extends Fragment {
         noLeaderBoard = view.findViewById(R.id.noLeaderBoards);
         leaderBoardTitle = view.findViewById(R.id.leaderBoardTitle);
         backBtn = view.findViewById(R.id.backBtn);
+        adHolder = view.findViewById(R.id.adHolder);
 
         rank1Image = view.findViewById(R.id.rank1Image);
         rank2Image = view.findViewById(R.id.rank2Image);
@@ -102,6 +127,7 @@ public class LeaderBoardFragment extends Fragment {
                 gameMethods.GetLeaderBoard(getActivity(), appToken, userToken, new GameMethods.LeaderBoardListener() {
                     @Override
                     public void onResult(List<Classes.LeaderBoard> list, int rank) {
+                        swipeRefreshLayout.setRefreshing(false);
                         leaderBoards = list;
                         UpdateTop();
                     }
@@ -110,6 +136,7 @@ public class LeaderBoardFragment extends Fragment {
         });
 
         getActivity().registerReceiver(actionReceiver, new IntentFilter("actionIntent"));
+        getActivity().registerReceiver(broadcastReceiver, new IntentFilter("ads"));
 
         return view;
     }
@@ -322,14 +349,20 @@ public class LeaderBoardFragment extends Fragment {
         }
     }
 
-    public void SetData(String appToken, String uToken, List<Classes.LeaderBoard> list, GameMethods.BackListener backListener, GameMethods.LoginListener lListener) {
+    public void SetData(String appToken, String uToken, List<Classes.LeaderBoard> list, boolean showAd, String adToken, GameMethods.BackListener backListener, GameMethods.LoginListener lListener) {
         leaderBoards = list;
         this.backListener = backListener;
         this.loginListener = lListener;
         this.appToken = appToken;
+        this.showAd = showAd;
+        this.adToken = adToken;
         userToken = uToken;
 
         UpdateTop();
+
+        if (isAdded()) {
+            InitializeAd(adHolder);
+        }
 
         if (userToken.equals("")) {
             Handler handler = new Handler();
@@ -356,9 +389,42 @@ public class LeaderBoardFragment extends Fragment {
         }
     }
 
+    public void InitializeAd(Advertise holder) {
+        SharedPreferences mPrefs =  PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if (mPrefs.getBoolean("AD_TIMEOUT", false)) {
+            String lastTime = mPrefs.getString("AD_TIMEOUT_TIME", "");
+            if (!lastTime.equals("")) {
+                Date lastDate = methods.StringDateToDate(lastTime, Methods.DATEFORMAT2);
+                Calendar calendar = Calendar.getInstance();
+                Calendar nowCalendar = Calendar.getInstance();
+                calendar.setTime(lastDate);
+                calendar.add(Calendar.MINUTE, 10);
+                if (nowCalendar.getTime().after(calendar.getTime())) {
+                    if (showAd) {
+                        holder.setVisibility(View.VISIBLE);
+                        holder.initialize(getActivity(), adToken);
+                    }
+                    else {
+                        holder.setVisibility(View.GONE);
+                    }
+                }
+            }
+        }
+        else {
+            if (showAd) {
+                holder.setVisibility(View.VISIBLE);
+                holder.initialize(getActivity(), adToken);
+            }
+            else {
+                holder.setVisibility(View.GONE);
+            }
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(actionReceiver);
+        getActivity().unregisterReceiver(broadcastReceiver);
     }
 }

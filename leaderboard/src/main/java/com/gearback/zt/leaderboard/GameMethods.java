@@ -71,7 +71,6 @@ public class GameMethods {
             public void onFinished(String result) {
                 if (!result.equals("")) {
                     methods.writeToFile("leaderboard.ini", result, activity);
-                    Log.e("result", result);
                     try {
                         JSONObject mainObject = new JSONObject(result);
                         JSONArray table = mainObject.getJSONArray("highscore");
